@@ -1,1 +1,10 @@
+# ECS tasks are private and require outbound HTTPS through NAT
 AWS-0104
+
+# Application Load Balancer is intentionally internet-facing
+AWS-0053
+
+
+# Portfolio environment currently has no custom domain/ACM certificate.
+# Production deployment would use ACM + HTTPS listener + HTTP-to-HTTPS redirect.
+AWS-0054

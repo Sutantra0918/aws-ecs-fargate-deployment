@@ -51,8 +51,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "taskflow_bucket_e
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.terraform_state.arn
     }
+
+    bucket_key_enabled = true
   }
 }
 
@@ -64,6 +67,24 @@ resource "aws_s3_bucket_public_access_block" "taskflow_bucket_public_access_bloc
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_kms_key" "terraform_state" {
+  description             = "KMS key for Terraform state encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = {
+    Name        = "${var.aws_project}-terraform-state-kms"
+    Project     = var.aws_project
+    Environment = "shared"
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_kms_alias" "terraform_state" {
+  name          = "alias/${var.aws_project}-terraform-state"
+  target_key_id = aws_kms_key.terraform_state.key_id
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -251,6 +272,21 @@ data "aws_iam_policy_document" "github_terraform_permissions" {
       "${aws_s3_bucket.taskflow_bucket.arn}/*"
     ]
   }
+  statement {
+    sid    = "TerraformStateKMS"
+    effect = "Allow"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey"
+    ]
+
+    resources = [
+      aws_kms_key.terraform_state.arn
+    ]
+  }
 }
 
 
@@ -417,6 +453,21 @@ data "aws_iam_policy_document" "github_terraform_plan_permissions" {
     ]
 
     resources = ["*"]
+  }
+  statement {
+    sid    = "TerraformStateKMS"
+    effect = "Allow"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey"
+    ]
+
+    resources = [
+      aws_kms_key.terraform_state.arn
+    ]
   }
 }
 
