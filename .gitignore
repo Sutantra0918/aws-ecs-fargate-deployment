@@ -10,6 +10,8 @@ crash.*.log
 # Bootstrap-specific local variables
 terraform/bootstrap/terraform.tfvars
 
+# Terraform debug logs
+*.log
 # Terraform CLI
 .terraformrc
 terraform.rc
