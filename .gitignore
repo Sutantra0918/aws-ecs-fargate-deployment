@@ -1,0 +1,28 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+
+# Bootstrap-specific local variables
+terraform/bootstrap/terraform.tfvars
+
+# Terraform CLI
+.terraformrc
+terraform.rc
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# OS / IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
